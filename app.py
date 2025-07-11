@@ -30,38 +30,129 @@ INDIAN_STATES = [
 
 # Enhanced GST rates by category
 gst_rates = {
-    # 0% GST
-    "Essential Food Items": 0,
-    "Basic Groceries": 0,
-    "Fresh Fruits & Vegetables": 0,
-    "Milk & Dairy (Basic)": 0,
-    
-    # 5% GST
-    "Necessities": 5,
-    "Basic Medicines": 5,
-    "Educational Materials": 5,
-    "Tea & Coffee": 5,
-    "Spices & Condiments": 5,
-    
-    # 12% GST
-    "Computers & IT Equipment": 12,
-    "Processed Foods": 12,
-    "Ayurvedic Medicines": 12,
-    "Industrial Inputs": 12,
-    
-    # 18% GST
-    "Electronics & Appliances": 18,
-    "Personal Care Products": 18,
-    "Restaurant Services": 18,
-    "Professional Services": 18,
-    "Software & IT Services": 18,
-    
-    # 28% GST
-    "Luxury Items": 28,
-    "Automobiles": 28,
-    "High-end Appliances": 28,
-    "Tobacco Products": 28,
-    "Luxury Cosmetics": 28
+    #  0% GST Items (Nil Rated / Exempt)
+    'rice (unpackaged)': 0,
+    'wheat (unpackaged)': 0,
+    'milk (fresh)': 0,
+    'vegetables (fresh)': 0,
+    'fruits (fresh)': 0,
+    'flour (unpackaged)': 0,
+    'salt': 0,
+    'potato': 0,
+    'onion': 0,
+    'tomato': 0,
+    'apple (fresh)': 0,
+    'banana (fresh)': 0,
+    'orange (fresh)': 0,
+    'prasad': 0,
+    'educational services': 0,
+    'health services': 0,
+    'unbranded paneer': 0,
+    'children\'s drawing & coloring books': 0,
+    'sanitary napkins': 0,
+
+    # 5% GST Items
+    'sugar': 5,
+    'tea (processed)': 5,
+    'coffee (roasted beans)': 5,
+    'spices': 5,
+    'medicine': 5, #/ Many life-saving drugs are 5%
+    'book': 5,
+    'newspaper': 5,
+    'milk powder': 5,
+    'baby food': 5,
+    'honey (packaged)': 5,
+    'turmeric (powdered)': 5,
+    'coriander (powdered)': 5,
+    'cumin (powdered)': 5,
+    'cardamom': 5,
+    'cinnamon': 5,
+    'rice (packaged/branded)': 5,
+    'wheat (packaged/branded)': 5,
+    'flour (packaged/branded)': 5,
+    'paneer (packaged/branded)': 5,
+    'coal': 5,
+    'edible oils': 5,
+    'domestic LPG': 5,
+    'restaurants (non-AC, no alcohol)': 5, #// Note: This can vary, some restaurants might be 18% with ITC
+    'footwear (< Rs.500)': 5,
+    'apparels (< Rs.1000)': 5,
+    'railway tickets (sleeper/non-AC)': 5,
+    'air travel (economy)': 5,
+
+    # 12% GST Items
+    'processed food': 12,
+    'ayurvedic (some preparations)': 12, #// Many medicines are 5%, but some specific Ayurvedic/Unani preparations can be 12%
+    'butter': 12,
+    'cheese': 12,
+    'ghee': 12,
+    'umbrella': 12,
+    'spectacles': 12,
+    'glasses': 12, #// Assuming spectacles/eyewear
+    'exercise book': 12,
+    'dried fruits': 12,
+    'frozen vegetables': 12,
+    'mobile phones': 18, #// IMPORTANT: Updated from 12% to 18%
+    'computer': 18, #// IMPORTANT: Updated from 12% to 18%
+    'laptop': 18, #// IMPORTANT: Updated from 12% to 18%
+    'tablet': 18, #// IMPORTANT: Updated from 12% to 18%
+    'processed vegetables': 12,
+    'hotel (rent Rs. 1000-7500/day)': 12,
+
+    #// 18% GST Items
+    'electronics (general)': 18,
+    'soap': 18,
+    'toothpaste': 18,
+    'shampoo': 18,
+    'television': 18,
+    'tv (up to 27 inches)': 18, #// Clarifying TV sizes
+    'washing machine': 18,
+    'refrigerator': 18,
+    'microwave': 18,
+    'iron': 18,
+    'mixer': 18,
+    'grinder': 18,
+    'fan': 18,
+    'cooler': 18,
+    'restaurant (AC/alcohol)': 18, #// Differentiated from 5%
+    'hotel (rent above Rs. 7500/day)': 18,
+    'service (general)': 18, #// Default for most non-exempt services
+    'software': 18,
+    'app': 18,
+    'website': 18,
+    'design': 18,
+    'consulting': 18,
+    'repair': 18,
+    'maintenance': 18,
+    'hair oil': 18,
+    'chocolates': 18,
+    'ice cream': 18,
+    'non-alcoholic beverages (packaged)': 18,
+
+    #// 28% GST Items
+    'car': 28, #// Plus cess depending on type
+    'bike': 28,
+    'motorcycle': 28, #// High-end motorcycles often have cess
+    'ac (air conditioner)': 28,
+    'cigarette': 28, #// Plus high cess
+    'tobacco': 28, #// Plus high cess
+    'luxury goods (general)': 28,
+    'perfume': 28,
+    'cosmetics': 28,
+    'dishwasher': 28,
+    'vacuum cleaner': 28,
+    'water heater': 28,
+    'cement': 28,
+    'online gaming': 28,
+    'carbonated beverages': 28, #// Plus cess
+    'tv (above 27 inches)': 28, # If applicable for very large TVs
+    'luxury cars': 28, # Plus high cess
+    'sin goods': 28, # General category for items like tobacco, pan masala
+
+    # Additional GST Rates
+    'gold': 3,
+    'precious stones': 3,
+    'diamonds (non-industrial)': 0.25,
 }
 
 invoices = []
@@ -713,5 +804,3 @@ if __name__ == '__main__':
     os.makedirs('invoices', exist_ok=True)
     os.makedirs('static/graphs', exist_ok=True)
     app.run(host='0.0.0.0',debug=True)
-
-    
