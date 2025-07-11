@@ -712,4 +712,6 @@ if __name__ == '__main__':
     # Create necessary directories
     os.makedirs('invoices', exist_ok=True)
     os.makedirs('static/graphs', exist_ok=True)
-    app.run(debug=True)
+    app.run(host='0.0.0.0',debug=True)
+
+    
