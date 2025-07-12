@@ -156,6 +156,7 @@ gst_rates = {
     'Artificial jewellery items':3,
     'Rough diamonds':0.25,
     'uncut gems':0.25,
+}
 
 invoices = []
 
