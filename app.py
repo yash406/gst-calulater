@@ -150,7 +150,7 @@ gst_rates = {
     'sin goods': 28, # General category for items like tobacco, pan masala
 
     # Additional GST Rates
-   'gold': 3,
+    'gold': 3,
     'precious stones': 3,
     'jewellery': 3,
     'Artificial jewellery items':3,
