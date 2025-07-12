@@ -51,12 +51,22 @@ gst_rates = {
     'children\'s drawing & coloring books': 0,
     'sanitary napkins': 0,
 
+    # 0.25% GST Items
+    'rough diamonds': 0.25,
+    'uncut gems': 0.25,
+    
+    # 3% GST Items
+    'gold': 3,
+    'precious stones': 3,
+    'jewellery': 3,
+    'artificial jewellery items': 3,
+
     # 5% GST Items
     'sugar': 5,
     'tea (processed)': 5,
     'coffee (roasted beans)': 5,
     'spices': 5,
-    'medicine': 5, #/ Many life-saving drugs are 5%
+    'medicine': 5,  # Many life-saving drugs are 5%
     'book': 5,
     'newspaper': 5,
     'milk powder': 5,
@@ -74,7 +84,7 @@ gst_rates = {
     'coal': 5,
     'edible oils': 5,
     'domestic LPG': 5,
-    'restaurants (non-AC, no alcohol)': 5, #// Note: This can vary, some restaurants might be 18% with ITC
+    'restaurants (non-AC, no alcohol)': 5,  # Note: This can vary, some restaurants might be 18% with ITC
     'footwear (< Rs.500)': 5,
     'apparels (< Rs.1000)': 5,
     'railway tickets (sleeper/non-AC)': 5,
@@ -82,30 +92,26 @@ gst_rates = {
 
     # 12% GST Items
     'processed food': 12,
-    'ayurvedic (some preparations)': 12, #// Many medicines are 5%, but some specific Ayurvedic/Unani preparations can be 12%
+    'ayurvedic (some preparations)': 12,  # Many medicines are 5%, but some specific Ayurvedic/Unani preparations can be 12%
     'butter': 12,
     'cheese': 12,
     'ghee': 12,
     'umbrella': 12,
     'spectacles': 12,
-    'glasses': 12, #// Assuming spectacles/eyewear
+    'glasses': 12,  # Assuming spectacles/eyewear
     'exercise book': 12,
     'dried fruits': 12,
     'frozen vegetables': 12,
-    'mobile phones': 18, #// IMPORTANT: Updated from 12% to 18%
-    'computer': 18, #// IMPORTANT: Updated from 12% to 18%
-    'laptop': 18, #// IMPORTANT: Updated from 12% to 18%
-    'tablet': 18, #// IMPORTANT: Updated from 12% to 18%
     'processed vegetables': 12,
     'hotel (rent Rs. 1000-7500/day)': 12,
 
-    #// 18% GST Items
+    # 18% GST Items
     'electronics (general)': 18,
     'soap': 18,
     'toothpaste': 18,
     'shampoo': 18,
     'television': 18,
-    'tv (up to 27 inches)': 18, #// Clarifying TV sizes
+    'tv (up to 27 inches)': 18,  # Clarifying TV sizes
     'washing machine': 18,
     'refrigerator': 18,
     'microwave': 18,
@@ -114,9 +120,9 @@ gst_rates = {
     'grinder': 18,
     'fan': 18,
     'cooler': 18,
-    'restaurant (AC/alcohol)': 18, #// Differentiated from 5%
+    'restaurant (AC/alcohol)': 18,  # Differentiated from 5%
     'hotel (rent above Rs. 7500/day)': 18,
-    'service (general)': 18, #// Default for most non-exempt services
+    'service (general)': 18,  # Default for most non-exempt services
     'software': 18,
     'app': 18,
     'website': 18,
@@ -128,14 +134,18 @@ gst_rates = {
     'chocolates': 18,
     'ice cream': 18,
     'non-alcoholic beverages (packaged)': 18,
+    'mobile phones': 18,
+    'computer': 18,
+    'laptop': 18,
+    'tablet': 18,
 
-    #// 28% GST Items
-    'car': 28, #// Plus cess depending on type
+    # 28% GST Items
+    'car': 28,  # Plus cess depending on type
     'bike': 28,
-    'motorcycle': 28, #// High-end motorcycles often have cess
+    'motorcycle': 28,  # High-end motorcycles often have cess
     'ac (air conditioner)': 28,
-    'cigarette': 28, #// Plus high cess
-    'tobacco': 28, #// Plus high cess
+    'cigarette': 28,  # Plus high cess
+    'tobacco': 28,  # Plus high cess
     'luxury goods (general)': 28,
     'perfume': 28,
     'cosmetics': 28,
@@ -144,18 +154,10 @@ gst_rates = {
     'water heater': 28,
     'cement': 28,
     'online gaming': 28,
-    'carbonated beverages': 28, #// Plus cess
-    'tv (above 27 inches)': 28, # If applicable for very large TVs
-    'luxury cars': 28, # Plus high cess
-    'sin goods': 28, # General category for items like tobacco, pan masala
-
-    # Additional GST Rates
-    'gold': 3,
-    'precious stones': 3,
-    'jewellery': 3,
-    'Artificial jewellery items':3,
-    'Rough diamonds':0.25,
-    'uncut gems':0.25,
+    'carbonated beverages': 28,  # Plus cess
+    'tv (above 27 inches)': 28,  # If applicable for very large TVs
+    'luxury cars': 28,  # Plus high cess
+    'sin goods': 28,  # General category for items like tobacco, pan masala
 }
 
 invoices = []
@@ -238,210 +240,276 @@ def extract_form_data(request_form):
     return form_data
 
 def generate_enhanced_pdf(invoice_data, invoice_id, bar_chart=None, pie_chart=None, line_chart=None):
-    """Generate an enhanced, professional PDF invoice"""
+    """Generate PDF that matches the print invoice layout exactly"""
     try:
         os.makedirs('invoices', exist_ok=True)
         pdf_filename = f"invoices/invoice_{invoice_id}.pdf"
         
-        # Create PDF document
-        doc = SimpleDocTemplate(pdf_filename, pagesize=A4,
-                              rightMargin=72, leftMargin=72,
-                              topMargin=72, bottomMargin=18)
+        # Create PDF document with custom canvas
+        from reportlab.pdfgen import canvas as pdf_canvas
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.colors import HexColor, black, white, grey
+        from reportlab.lib.units import inch
         
-        # Define styles
-        styles = getSampleStyleSheet()
+        # Create canvas
+        c = pdf_canvas.Canvas(pdf_filename, pagesize=A4)
+        width, height = A4
         
-        # Custom styles
-        title_style = ParagraphStyle(
-            'CustomTitle',
-            parent=styles['Heading1'],
-            fontSize=24,
-            spaceAfter=30,
-            textColor=HexColor('#2c3e50'),
-            alignment=1,  # Center alignment
-            fontName='Helvetica-Bold'
-        )
+        # Define colors to match the web version
+        primary_color = HexColor('#0d6efd')  # Bootstrap primary blue
+        text_color = HexColor('#212529')     # Bootstrap dark text
+        muted_color = HexColor('#6c757d')    # Bootstrap muted text
+        success_color = HexColor('#198754')  # Bootstrap success green
+        light_bg = HexColor('#f8f9fa')       # Bootstrap light background
+        border_color = HexColor('#dee2e6')   # Bootstrap border color
         
-        heading_style = ParagraphStyle(
-            'CustomHeading',
-            parent=styles['Heading2'],
-            fontSize=14,
-            spaceAfter=12,
-            textColor=HexColor('#34495e'),
-            fontName='Helvetica-Bold'
-        )
+        # Header section - matches the web layout
+        y_pos = height - 60
         
-        normal_style = ParagraphStyle(
-            'CustomNormal',
-            parent=styles['Normal'],
-            fontSize=10,
-            spaceAfter=6,
-            textColor=HexColor('#2c3e50')
-        )
+        # Main title and invoice number (same line)
+        c.setFillColor(primary_color)
+        c.setFont('Helvetica-Bold', 24)
+        c.drawString(50, y_pos, f'GST Invoice #{invoice_id}')
         
-        # Build PDF content
-        story = []
+        # Badge for GST type (right aligned)
+        badge_text = f"{invoice_data['gst_type'].capitalize()}-state"
+        badge_color = success_color if invoice_data['gst_type'] == 'intra' else primary_color
         
-        # Header
-        story.append(Paragraph("🧾 GST INVOICE", title_style))
-        story.append(Spacer(1, 12))
+        c.setFillColor(badge_color)
+        badge_width = 80
+        badge_height = 20
+        badge_x = width - 50 - badge_width
+        c.roundRect(badge_x, y_pos + 5, badge_width, badge_height, 10, fill=1)
         
-        # Invoice details table
-        invoice_details = [
-            ['Invoice ID:', f'#{invoice_id}'],
-            ['Date:', datetime.now().strftime('%Y-%m-%d %H:%M:%S')],
-            ['GST Type:', f'{invoice_data["gst_type"].upper()}-STATE'],
-            ['Status:', 'PAID' if invoice_data['total'] > 0 else 'DRAFT']
-        ]
+        c.setFillColor(white)
+        c.setFont('Helvetica-Bold', 10)
+        c.drawCentredString(badge_x + badge_width/2, y_pos + 12, badge_text)
         
-        details_table = Table(invoice_details, colWidths=[2*inch, 3*inch])
-        details_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (0, -1), HexColor('#ecf0f1')),
-            ('TEXTCOLOR', (0, 0), (-1, -1), HexColor('#2c3e50')),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-            ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('GRID', (0, 0), (-1, -1), 1, HexColor('#bdc3c7')),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('ROWBACKGROUNDS', (0, 0), (-1, -1), [HexColor('#ffffff'), HexColor('#f8f9fa')])
-        ]))
+        # Generated timestamp
+        y_pos -= 35
+        c.setFillColor(muted_color)
+        c.setFont('Helvetica', 10)
+        c.drawString(50, y_pos, f'Generated on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
         
-        story.append(details_table)
-        story.append(Spacer(1, 20))
+        # Invoice Details section
+        y_pos -= 40
+        c.setFillColor(text_color)
+        c.setFont('Helvetica-Bold', 14)
+        c.drawString(50, y_pos, 'Invoice Details')
         
-        # Items heading
-        story.append(Paragraph("📦 INVOICE ITEMS", heading_style))
-        story.append(Spacer(1, 12))
+        y_pos -= 25
+        c.setFont('Helvetica', 11)
+        c.drawString(50, y_pos, f'Seller State: {invoice_data.get("seller_state", "N/A")}')
         
-        # Items table
-        items_data = [['Item Name', 'Qty', 'Price (₹)', 'GST Rate (%)', 'GST Amount (₹)', 'Total (₹)']]
+        y_pos -= 18
+        c.drawString(50, y_pos, f'Buyer State: {invoice_data.get("buyer_state", "N/A")}')
         
-        for item in invoice_data['items']:
-            total_price = item['item_total'] + item['item_gst']
-            items_data.append([
-                item['name'][:25] + ('...' if len(item['name']) > 25 else ''),
-                str(item['qty']),
-                f"{item['price']:.2f}",
-                f"{item['gst_rate']:.1f}%",
-                f"{item['item_gst']:.2f}",
-                f"{total_price:.2f}"
-            ])
+        y_pos -= 25
+        c.setFont('Helvetica-Bold', 11)
+        c.drawString(50, y_pos, 'GST Breakdown:')
         
-        items_table = Table(items_data, colWidths=[2.5*inch, 0.7*inch, 1*inch, 1*inch, 1*inch, 1*inch])
-        items_table.setStyle(TableStyle([
-            # Header row
-            ('BACKGROUND', (0, 0), (-1, 0), HexColor('#3498db')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('ALIGN', (0, 1), (0, -1), 'LEFT'),  # Item names left-aligned
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('FONTSIZE', (0, 1), (-1, -1), 9),
-            
-            # Data rows
-            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [HexColor('#ffffff'), HexColor('#f8f9fa')]),
-            ('GRID', (0, 0), (-1, -1), 1, HexColor('#bdc3c7')),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            
-            # Total column highlighting
-            ('BACKGROUND', (-1, 1), (-1, -1), HexColor('#e8f5e8')),
-            ('FONTNAME', (-1, 1), (-1, -1), 'Helvetica-Bold'),
-        ]))
-        
-        story.append(items_table)
-        story.append(Spacer(1, 20))
-        
-        # Summary section
-        story.append(Paragraph("💰 INVOICE SUMMARY", heading_style))
-        story.append(Spacer(1, 12))
-        
-        # Summary table
-        summary_data = [
-            ['Subtotal:', f"₹{invoice_data['subtotal']:.2f}"]
-        ]
-        
+        y_pos -= 18
+        c.setFont('Helvetica', 10)
         if invoice_data['gst_type'] == 'intra':
-            summary_data.extend([
-                ['CGST:', f"₹{invoice_data['total_cgst']:.2f}"],
-                ['SGST:', f"₹{invoice_data['total_sgst']:.2f}"]
-            ])
+            c.drawString(50, y_pos, f'CGST: ₹{invoice_data["total_cgst"]:.2f}')
+            y_pos -= 15
+            c.drawString(50, y_pos, f'SGST: ₹{invoice_data["total_sgst"]:.2f}')
         else:
-            summary_data.append(['IGST:', f"₹{invoice_data['total_igst']:.2f}"])
+            c.drawString(50, y_pos, f'IGST: ₹{invoice_data["total_igst"]:.2f}')
         
-        summary_data.extend([
-            ['Total GST:', f"₹{invoice_data['gst_total']:.2f}"],
-            ['', ''],  # Empty row for spacing
-            ['FINAL TOTAL:', f"₹{invoice_data['total']:.2f}"]
-        ])
+        # Items Table - matches Bootstrap table styling
+        table_y = y_pos - 50
         
-        summary_table = Table(summary_data, colWidths=[2*inch, 2*inch])
-        summary_table.setStyle(TableStyle([
-            ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
-            ('FONTNAME', (0, 0), (0, -2), 'Helvetica'),
-            ('FONTNAME', (1, 0), (1, -2), 'Helvetica'),
-            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -2), 10),
-            ('FONTSIZE', (0, -1), (-1, -1), 14),
-            ('TEXTCOLOR', (0, -1), (-1, -1), HexColor('#e74c3c')),
-            ('BACKGROUND', (0, -1), (-1, -1), HexColor('#fff5f5')),
-            ('GRID', (0, 0), (-1, -2), 1, HexColor('#bdc3c7')),
-            ('BOX', (0, -1), (-1, -1), 2, HexColor('#e74c3c')),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ]))
+        # Table header
+        header_height = 35
+        c.setFillColor(text_color)  # Dark header like Bootstrap
+        c.rect(50, table_y, width - 100, header_height, fill=1)
         
-        story.append(summary_table)
-        story.append(Spacer(1, 30))
+        # Header text (white on dark)
+        c.setFillColor(white)
+        c.setFont('Helvetica-Bold', 11)
         
-        # Add charts if available
-        if bar_chart and os.path.exists(bar_chart):
-            story.append(Paragraph("📊 GST ANALYSIS CHARTS", heading_style))
-            story.append(Spacer(1, 12))
+        # Column positions (matching web layout)
+        col_item = 60
+        col_qty = 200
+        col_price = 280
+        col_gst_rate = 360
+        col_gst_amt = 440
+        col_total = 520
+        
+        c.drawString(col_item, table_y + 12, 'Item')
+        c.drawCentredString(col_qty + 20, table_y + 12, 'Qty')
+        c.drawRightString(col_price + 40, table_y + 12, 'Price (₹)')
+        c.drawCentredString(col_gst_rate + 30, table_y + 12, 'GST Rate (%)')
+        c.drawRightString(col_gst_amt + 40, table_y + 12, 'GST Amount (₹)')
+        c.drawRightString(col_total + 40, table_y + 12, 'Total (₹)')
+        
+        # Table rows with alternating colors (like Bootstrap striped table)
+        row_height = 30
+        row_y = table_y - row_height
+        
+        for i, item in enumerate(invoice_data['items']):
+            # Alternating row colors
+            if i % 2 == 0:
+                c.setFillColor(light_bg)
+                c.rect(50, row_y, width - 100, row_height, fill=1)
             
-            # Create a table for charts
-            chart_data = []
-            chart_row = []
+            # Row border
+            c.setStrokeColor(border_color)
+            c.setLineWidth(0.5)
+            c.rect(50, row_y, width - 100, row_height, fill=0)
             
-            if bar_chart and os.path.exists(bar_chart):
-                chart_row.append(Image(bar_chart, width=2*inch, height=1.5*inch))
+            # Row content
+            c.setFillColor(text_color)
+            c.setFont('Helvetica', 10)
             
-            if pie_chart and os.path.exists(pie_chart):
-                chart_row.append(Image(pie_chart, width=2*inch, height=1.5*inch))
+            # Item name (truncate if too long)
+            item_name = item['name'][:25] + ('...' if len(item['name']) > 25 else '')
+            c.drawString(col_item, row_y + 10, item_name)
             
-            if line_chart and os.path.exists(line_chart):
-                chart_row.append(Image(line_chart, width=2*inch, height=1.5*inch))
+            # Quantity (centered)
+            c.drawCentredString(col_qty + 20, row_y + 10, str(item['qty']))
             
-            if chart_row:
-                chart_data.append(chart_row)
-                charts_table = Table(chart_data)
-                charts_table.setStyle(TableStyle([
-                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                    ('LEFTPADDING', (0, 0), (-1, -1), 6),
-                    ('RIGHTPADDING', (0, 0), (-1, -1), 6),
-                ]))
-                story.append(charts_table)
+            # Price (right aligned)
+            c.drawRightString(col_price + 40, row_y + 10, f"{item['price']:.2f}")
+            
+            # GST Rate (centered)
+            c.drawCentredString(col_gst_rate + 30, row_y + 10, f"{item['gst_rate']:.2f}")
+            
+            # GST Amount (right aligned)
+            c.drawRightString(col_gst_amt + 40, row_y + 10, f"{item['item_gst']:.2f}")
+            
+            # Total (right aligned, bold)
+            total_price = item['item_total'] + item['item_gst']
+            c.setFont('Helvetica-Bold', 10)
+            c.drawRightString(col_total + 40, row_y + 10, f"{total_price:.2f}")
+            
+            row_y -= row_height
         
-        # Footer
-        story.append(Spacer(1, 30))
-        footer_text = f"""
-        <para align="center">
-        <font size="8" color="#7f8c8d">
-        Generated by GST Invoice System | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}<br/>
-        This is a computer-generated invoice and does not require a signature.
-        </font>
-        </para>
-        """
-        story.append(Paragraph(footer_text, styles['Normal']))
+        # Summary section (matches web layout exactly)
+        summary_y = row_y - 30
+        summary_x = 350  # Right side like web version
         
-        # Build PDF
-        doc.build(story)
+        # Summary background (light like web)
+        c.setFillColor(light_bg)
+        summary_width = 200
+        summary_height = 120
+        c.roundRect(summary_x, summary_y - summary_height + 20, summary_width, summary_height, 8, fill=1)
+        
+        # Summary content
+        c.setFillColor(text_color)
+        c.setFont('Helvetica', 11)
+        
+        # Subtotal
+        c.drawString(summary_x + 10, summary_y, 'Subtotal:')
+        c.drawRightString(summary_x + summary_width - 10, summary_y, f'₹{invoice_data["subtotal"]:.2f}')
+        
+        summary_y -= 20
+        if invoice_data['gst_type'] == 'intra':
+            c.setFont('Helvetica', 10)
+            c.setFillColor(muted_color)
+            c.drawString(summary_x + 10, summary_y, 'CGST:')
+            c.drawRightString(summary_x + summary_width - 10, summary_y, f'₹{invoice_data["total_cgst"]:.2f}')
+            
+            summary_y -= 15
+            c.drawString(summary_x + 10, summary_y, 'SGST:')
+            c.drawRightString(summary_x + summary_width - 10, summary_y, f'₹{invoice_data["total_sgst"]:.2f}')
+        else:
+            c.setFont('Helvetica', 10)
+            c.setFillColor(muted_color)
+            c.drawString(summary_x + 10, summary_y, 'IGST:')
+            c.drawRightString(summary_x + summary_width - 10, summary_y, f'₹{invoice_data["total_igst"]:.2f}')
+        
+        summary_y -= 20
+        c.setFillColor(text_color)
+        c.setFont('Helvetica', 11)
+        c.drawString(summary_x + 10, summary_y, 'Total GST:')
+        c.drawRightString(summary_x + summary_width - 10, summary_y, f'₹{invoice_data["gst_total"]:.2f}')
+        
+        # Final total (highlighted like web version)
+        summary_y -= 25
+        c.setStrokeColor(success_color)
+        c.setLineWidth(2)
+        c.rect(summary_x + 5, summary_y - 8, summary_width - 10, 25, fill=0)
+        
+        c.setFillColor(text_color)
+        c.setFont('Helvetica-Bold', 12)
+        c.drawString(summary_x + 10, summary_y, 'Final Total:')
+        c.drawRightString(summary_x + summary_width - 10, summary_y, f'₹{invoice_data["total"]:.2f}')
+        
+        # GST Analysis Charts section (if charts exist)
+        charts_y = summary_y - 80
+        if charts_y > 200 and (bar_chart or pie_chart or line_chart):
+            # Section divider
+            c.setStrokeColor(border_color)
+            c.setLineWidth(1)
+            c.line(50, charts_y + 20, width - 50, charts_y + 20)
+            
+            c.setFillColor(text_color)
+            c.setFont('Helvetica-Bold', 14)
+            c.drawString(50, charts_y, 'GST Analysis Charts')
+            
+            chart_y_pos = charts_y - 40
+            chart_width = 150
+            chart_height = 110
+            chart_spacing = 20
+            
+            try:
+                from reportlab.lib.utils import ImageReader
+                chart_x = 50
+                
+                # Bar Chart
+                if bar_chart and os.path.exists(bar_chart):
+                    c.drawImage(ImageReader(bar_chart), chart_x, chart_y_pos - chart_height, 
+                               width=chart_width, height=chart_height)
+                    c.setFont('Helvetica-Bold', 10)
+                    c.drawCentredString(chart_x + chart_width/2, chart_y_pos - chart_height - 15, 
+                                       'GST Components - Bar Chart')
+                    chart_x += chart_width + chart_spacing
+                
+                # Pie Chart
+                if pie_chart and os.path.exists(pie_chart):
+                    c.drawImage(ImageReader(pie_chart), chart_x, chart_y_pos - chart_height, 
+                               width=chart_width, height=chart_height)
+                    c.setFont('Helvetica-Bold', 10)
+                    c.drawCentredString(chart_x + chart_width/2, chart_y_pos - chart_height - 15, 
+                                       'GST Distribution - Pie Chart')
+                    chart_x += chart_width + chart_spacing
+                
+                # Line Chart
+                if line_chart and os.path.exists(line_chart):
+                    c.drawImage(ImageReader(line_chart), chart_x, chart_y_pos - chart_height, 
+                               width=chart_width, height=chart_height)
+                    c.setFont('Helvetica-Bold', 10)
+                    c.drawCentredString(chart_x + chart_width/2, chart_y_pos - chart_height - 15, 
+                                       'GST Trend - Line Chart')
+                
+                # Update footer position
+                footer_y = chart_y_pos - chart_height - 40
+            except Exception as e:
+                print(f"Error adding charts to PDF: {e}")
+                footer_y = charts_y - 40
+        else:
+            footer_y = summary_y - 60
+        
+        # Footer section (matches web styling)
+        if footer_y > 50:
+            c.setStrokeColor(border_color)
+            c.setLineWidth(1)
+            c.line(50, footer_y + 10, width - 50, footer_y + 10)
+            
+            c.setFillColor(muted_color)
+            c.setFont('Helvetica', 9)
+            c.drawString(50, footer_y - 10, 'Thank you for your business!')
+            c.drawRightString(width - 50, footer_y - 10, 'GST Invoice System - Professional Invoice Generator')
+        
+        # Save the PDF
+        c.save()
         
         return pdf_filename
         
     except Exception as e:
-        print(f"Error generating enhanced PDF: {e}")
+        print(f"Error generating PDF: {e}")
         traceback.print_exc()
         return None
 
@@ -517,7 +585,7 @@ def generate_gst_graphs(invoice_data, invoice_id):
 
         # Enhanced Bar chart
         plt.style.use('seaborn-v0_8')
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(10, 6))  # Increased figure size
         bars = ax.bar(labels, values, color=colors, alpha=0.8, edgecolor='white', linewidth=2)
         
         # Add value labels on bars
@@ -541,7 +609,7 @@ def generate_gst_graphs(invoice_data, invoice_id):
         plt.close()
 
         # Enhanced Pie chart
-        fig, ax = plt.subplots(figsize=(10, 8))
+        fig, ax = plt.subplots(figsize=(10, 8))  # Increased figure size
         wedges, texts, autotexts = ax.pie(values, labels=labels, autopct='%1.1f%%', 
                                          colors=colors, startangle=90, 
                                          explode=[0.05]*len(values),
@@ -570,7 +638,7 @@ def generate_gst_graphs(invoice_data, invoice_id):
         plt.close()
 
         # Enhanced Line chart
-        fig, ax = plt.subplots(figsize=(12, 7))
+        fig, ax = plt.subplots(figsize=(12, 7))  # Increased figure size
         multipliers = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4]
         base_prices = [base_price * m for m in multipliers]
         
@@ -745,7 +813,9 @@ def generate():
             'gst_type': gst_type,
             'total_cgst': round(total_cgst, 2),
             'total_sgst': round(total_sgst, 2),
-            'total_igst': round(total_igst, 2)
+            'total_igst': round(total_igst, 2),
+            'seller_state': state_seller,  # Pass seller state to PDF
+            'buyer_state': state_buyer  # Pass buyer state to PDF
         }
         
         invoice_id = len(invoices) + 1
@@ -806,4 +876,4 @@ if __name__ == '__main__':
     # Create necessary directories
     os.makedirs('invoices', exist_ok=True)
     os.makedirs('static/graphs', exist_ok=True)
-    app.run(host='0.0.0.0',debug=True)
+    app.run(host='0.0.0.0', debug=True)
