@@ -286,6 +286,17 @@
                                         <td>Essential Items</td>
                                         <td>Rice, Wheat, Milk, Vegetables, Fruits</td>
                                     </tr>
+                                    <tr class="gst-rate-0.25">
+                                        <td><strong>0.25%</strong></td>
+                                        <td>Non - industrial</td>
+                                        <td>Rough diamonds, uncut gems</td>
+                                    </tr>
+                                    <tr class="gst-rate-3">
+                                        <td><strong>3%</strong></td>
+                                        <td>Industtrial jewellery</td>
+                                        <td>Bullion, coins, jewellery,	Diamond, Ruby, Sapphire (cut & polished)</td>
+                                    </tr>
+
                                     <tr class="gst-rate-5">
                                         <td><strong>5%</strong></td>
                                         <td>Necessities</td>
@@ -450,7 +461,8 @@
                                     onchange="toggleManualGST(this, 0)" required>
                                     <option value="" disabled selected>Select GST Rate</option>
                                     <option value="0">0% - Essential Items</option>
-                                    <option value="3">3% - Additional Items</option>
+                                    <option value="0.25">0.25% - Rough diamonds, uncut gems</option>
+                                    <option value="3">3% - Additional Items(Gold precios stone)</option>
                                     <option value="5">5% - Necessities</option>
                                     <option value="12">12% - Standard Items</option>
                                     <option value="18">18% - Most Goods</option>
@@ -609,7 +621,12 @@
             // Additional GST Rates
             'gold': 3,
             'precious stones': 3,
-            'diamonds (non-industrial)': 0.25,
+            'jewellery': 3,
+            'Artificial jewellery items':3,
+
+            'Rough diamonds':0.25,
+            'uncut gems':0.25,
+            
         };
 
         let itemCounter = {{ (form_data.get('items') | length if form_data and form_data.get('items') else 1) }};
@@ -620,15 +637,17 @@
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['0%', '5%', '12%', '18%', '28%'],
+                    labels: ['0%','0.25%','3%', '5%', '12%', '18%', '28%'],
                     datasets: [{
-                        data: [20, 25, 20, 25, 10], // Approximate distribution
+                        data: [21,2, 3, 24, 25, 17], // Approximate distribution
                         backgroundColor: [
                             '#28a745',
                             '#17a2b8',
                             '#ffc107',
                             '#fd7e14',
-                            '#6c757d'
+                            '#6c757d',
+                            '#dc3545',
+                            
                         ],
                         borderWidth: 2,
                         borderColor: '#fff'
